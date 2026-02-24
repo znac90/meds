@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medicinlogg</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f0ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #3b1f6e;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #7a6a99;
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(80, 40, 160, 0.1);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      color: #5a3fa0;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 18px;
+    }
+
+    /* Medication checkboxes */
+    .med-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .med-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border: 2px solid #e8e0f8;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+
+    .med-item:hover {
+      border-color: #b49ddf;
+      background: #faf7ff;
+    }
+
+    .med-item.checked {
+      border-color: #7c4dcc;
+      background: #f0eaff;
+    }
+
+    .med-item input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: #7c4dcc;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .med-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #2d1a55;
+    }
+
+    .med-last {
+      font-size: 0.8rem;
+      color: #9985c4;
+      margin-top: 2px;
+    }
+
+    /* Time selector */
+    .time-selector {
+      background: #f8f4ff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .time-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 0;
+    }
+
+    .time-toggle button {
+      flex: 1;
+      padding: 8px;
+      border: 2px solid #e0d4f8;
+      border-radius: 8px;
+      background: #fff;
+      color: #7a6a99;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .time-toggle button.active {
+      background: #7c4dcc;
+      border-color: #7c4dcc;
+      color: #fff;
+    }
+
+    .custom-time-row {
+      display: none;
+      margin-top: 12px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .custom-time-row.visible {
+      display: flex;
+    }
+
+    .custom-time-row label {
+      font-size: 0.85rem;
+      color: #5a3fa0;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .custom-time-row input[type="datetime-local"] {
+      flex: 1;
+      padding: 8px 10px;
+      border: 2px solid #d0c4f0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #2d1a55;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .custom-time-row input[type="datetime-local"]:focus {
+      border-color: #7c4dcc;
+    }
+
+    .confirm-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: #7c4dcc;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .confirm-btn:hover {
+      background: #6a3db8;
+    }
+
+    .confirm-btn:active {
+      transform: scale(0.98);
+    }
+
+    .confirm-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Log section */
+    .log-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .log-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0eaff;
+      gap: 8px;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-med {
+      font-weight: 600;
+      color: #2d1a55;
+      font-size: 0.95rem;
+    }
+
+    .log-time {
+      font-size: 0.85rem;
+      color: #7a6a99;
+      white-space: nowrap;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #3b1f6e;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      transition: transform 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Medicinlogg</h1>
+  <p class="subtitle">Välj medicin och bekräfta för att logga tidpunkten</p>
+
+  <div class="card">
+    <h2>Ge medicin</h2>
+
+    <div class="med-list" id="medList"></div>
+
+    <!-- Time selector -->
+    <div class="time-selector">
+      <div class="time-toggle">
+        <button id="btnNow" class="active" onclick="setTimeMode('now')">Nu</button>
+        <button id="btnCustom" onclick="setTimeMode('custom')">Annan tidpunkt</button>
+      </div>
+      <div class="custom-time-row" id="customTimeRow">
+        <label for="customTime">Tid:</label>
+        <input type="datetime-local" id="customTime" />
+      </div>
+    </div>
+
+    <button class="confirm-btn" id="confirmBtn" disabled onclick="confirmDose()">
+      Bekräfta given dos
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>Senast givet</h2>
+    <div class="log-list" id="logList"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const MEDS = [
+      { id: "paracetamol", name: "Paracetamol 125mg" },
+      { id: "ipren",       name: "Ipren 60mg" },
+      { id: "antibiotika", name: "Antibiotika" },
+    ];
+
+    const STORAGE_KEY = "medicinlogg_v1";
+    let timeMode = "now"; // "now" | "custom"
+
+    function loadLog() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveLog(log) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(log));
+    }
+
+    function formatTime(isoString) {
+      if (!isoString) return null;
+      const d = new Date(isoString);
+      const now = new Date();
+      const diffMs = now - d;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      const timeStr = d.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+      const dateStr = d.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" });
+
+      if (diffDays === 0) {
+        if (diffMins < 1) return "Just nu";
+        if (diffMins < 60) return `för ${diffMins} min sedan (${timeStr})`;
+        return `idag ${timeStr} (${diffHours} tim sedan)`;
+      } else if (diffDays === 1) {
+        return `igår ${timeStr}`;
+      } else {
+        return `${dateStr} kl ${timeStr}`;
+      }
+    }
+
+    function setTimeMode(mode) {
+      timeMode = mode;
+      document.getElementById("btnNow").classList.toggle("active", mode === "now");
+      document.getElementById("btnCustom").classList.toggle("active", mode === "custom");
+      const row = document.getElementById("customTimeRow");
+      row.classList.toggle("visible", mode === "custom");
+
+      if (mode === "custom") {
+        // Pre-fill with current local time
+        const now = new Date();
+        now.setSeconds(0, 0);
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 16);
+        document.getElementById("customTime").value = local;
+      }
+    }
+
+    function renderMedList() {
+      const log = loadLog();
+      const container = document.getElementById("medList");
+      container.innerHTML = "";
+
+      MEDS.forEach(med => {
+        const lastTime = log[med.id];
+        const label = document.createElement("label");
+        label.className = "med-item";
+        label.htmlFor = "chk_" + med.id;
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = "chk_" + med.id;
+        checkbox.addEventListener("change", updateConfirmBtn);
+        checkbox.addEventListener("change", () => {
+          label.classList.toggle("checked", checkbox.checked);
+        });
+
+        const textDiv = document.createElement("div");
+
+        const nameEl = document.createElement("div");
+        nameEl.className = "med-name";
+        nameEl.textContent = med.name;
+
+        const lastEl = document.createElement("div");
+        lastEl.className = "med-last";
+        lastEl.textContent = lastTime
+          ? "Senast: " + formatTime(lastTime)
+          : "Ingen dos loggad ännu";
+
+        textDiv.appendChild(nameEl);
+        textDiv.appendChild(lastEl);
+        label.appendChild(checkbox);
+        label.appendChild(textDiv);
+        container.appendChild(label);
+      });
+    }
+
+    function renderLogList() {
+      const log = loadLog();
+      const container = document.getElementById("logList");
+      container.innerHTML = "";
+
+      MEDS.forEach(med => {
+        const row = document.createElement("div");
+        row.className = "log-entry";
+
+        const medEl = document.createElement("span");
+        medEl.className = "log-med";
+        medEl.textContent = med.name;
+
+        const timeEl = document.createElement("span");
+        timeEl.className = "log-time";
+        timeEl.textContent = log[med.id] ? formatTime(log[med.id]) : "–";
+
+        row.appendChild(medEl);
+        row.appendChild(timeEl);
+        container.appendChild(row);
+      });
+    }
+
+    function updateConfirmBtn() {
+      const anyChecked = MEDS.some(med =>
+        document.getElementById("chk_" + med.id)?.checked
+      );
+      document.getElementById("confirmBtn").disabled = !anyChecked;
+    }
+
+    function confirmDose() {
+      let timestamp;
+
+      if (timeMode === "custom") {
+        const val = document.getElementById("customTime").value;
+        if (!val) {
+          showToast("Ange en tidpunkt först");
+          return;
+        }
+        timestamp = new Date(val).toISOString();
+      } else {
+        timestamp = new Date().toISOString();
+      }
+
+      const log = loadLog();
+      const given = [];
+
+      MEDS.forEach(med => {
+        const chk = document.getElementById("chk_" + med.id);
+        if (chk && chk.checked) {
+          log[med.id] = timestamp;
+          given.push(med.name);
+          chk.checked = false;
+        }
+      });
+
+      saveLog(log);
+      renderMedList();
+      renderLogList();
+      updateConfirmBtn();
+
+      const timeLabel = timeMode === "custom"
+        ? " (retroaktivt)"
+        : "";
+      showToast("Loggat: " + given.join(", ") + timeLabel);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3000);
+    }
+
+    // Refresh displayed times every minute
+    setInterval(() => {
+      renderMedList();
+      renderLogList();
+    }, 60000);
+
+    renderMedList();
+    renderLogList();
+  </script>
+</body>
+</html>
