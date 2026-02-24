@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Medicinlogg</title>
-  <!-- Gun.js: peer-to-peer real-time database, no server needed -->
-  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,15 +26,125 @@
       text-align: center;
     }
 
-    /* Sync bar */
-    .sync-bar {
+    /* ── Setup screen ─────────────────────────────────────────────── */
+    #setupScreen {
       width: 100%;
       max-width: 420px;
+      display: none;
+    }
+
+    .setup-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(80,40,160,0.12);
+      padding: 28px 24px;
+    }
+
+    .setup-card h2 {
+      font-size: 1.1rem;
+      color: #3b1f6e;
+      margin-bottom: 6px;
+    }
+
+    .setup-card p.lead {
+      color: #7a6a99;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .steps { margin-bottom: 22px; }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0eaff;
+      align-items: flex-start;
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-num {
+      background: #7c4dcc;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-text {
+      font-size: 0.9rem;
+      color: #2d1a55;
+      line-height: 1.5;
+    }
+
+    .step-text a {
+      color: #7c4dcc;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .step-text code {
+      background: #f0eaff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: #5a3fa0;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #d0c4f0;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #2d1a55;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    .url-input:focus { border-color: #7c4dcc; }
+    .url-input::placeholder { color: #b0a0cc; }
+
+    .save-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #7c4dcc;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .save-btn:hover { background: #6a3db8; }
+
+    .error-msg {
+      color: #c0392b;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* ── Main app ─────────────────────────────────────────────────── */
+    #appScreen { width: 100%; max-width: 420px; display: none; }
+
+    .sync-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
-      min-height: 22px;
     }
 
     .sync-status {
@@ -65,11 +173,12 @@
       50%       { opacity: 0.4; }
     }
 
-    /* Share button */
-    .share-btn {
+    .top-btns { display: flex; gap: 8px; }
+
+    .icon-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       padding: 6px 12px;
       background: #ede8ff;
       color: #5a3fa0;
@@ -81,16 +190,15 @@
       transition: background 0.15s;
     }
 
-    .share-btn:hover { background: #ddd6fa; }
+    .icon-btn:hover { background: #ddd6fa; }
 
     /* Card */
     .card {
       background: #fff;
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(80, 40, 160, 0.1);
+      box-shadow: 0 4px 20px rgba(80,40,160,0.1);
       padding: 28px 24px;
       width: 100%;
-      max-width: 420px;
       margin-bottom: 24px;
     }
 
@@ -102,7 +210,6 @@
       margin-bottom: 18px;
     }
 
-    /* Medication checkboxes */
     .med-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
 
     .med-item {
@@ -131,7 +238,6 @@
     .med-name { font-size: 1.05rem; font-weight: 600; color: #2d1a55; }
     .med-last { font-size: 0.8rem; color: #9985c4; margin-top: 2px; }
 
-    /* Time selector */
     .time-selector {
       background: #f8f4ff;
       border-radius: 12px;
@@ -187,7 +293,7 @@
       outline: none;
     }
 
-    .custom-time-row input[type="datetime-local"]:focus { border-color: #7c4dcc; }
+    .custom-time-row input:focus { border-color: #7c4dcc; }
 
     .confirm-btn {
       display: block;
@@ -207,7 +313,6 @@
     .confirm-btn:active  { transform: scale(0.98); }
     .confirm-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-    /* Log section */
     .log-list { display: flex; flex-direction: column; }
 
     .log-entry {
@@ -250,43 +355,115 @@
   <h1>Medicinlogg</h1>
   <p class="subtitle">Välj medicin och bekräfta för att logga tidpunkten</p>
 
-  <!-- Sync status + share -->
-  <div class="sync-bar">
-    <div class="sync-status">
-      <div class="sync-dot syncing" id="syncDot"></div>
-      <span id="syncText">Ansluter…</span>
+  <!-- ── Setup screen ──────────────────────────────────────────────── -->
+  <div id="setupScreen">
+    <div class="setup-card">
+      <h2>Anslut Firebase (gratis)</h2>
+      <p class="lead">
+        Synken kräver en gratis databas. Följ stegen nedan — tar ca 5 minuter.
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            Gå till
+            <a href="https://console.firebase.google.com/" target="_blank">
+              console.firebase.google.com
+            </a>
+            och klicka <strong>Skapa ett projekt</strong>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            Ge projektet ett namn (t.ex. <code>medicinlogg</code>),
+            klicka dig igenom och skapa projektet
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            I vänstermenyn: klicka <strong>Bygg → Realtime Database</strong>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            Klicka <strong>Skapa databas</strong> → välj plats (Europa) →
+            välj <strong>Testläge</strong> → klicka Aktivera
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-text">
+            Kopiera URL:en högst upp (ser ut som<br>
+            <code>https://xxx-default-rtdb.europe-west1.firebasedatabase.app</code>)
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-text">Klistra in URL:en här nedanför och klicka Spara</div>
+        </div>
+      </div>
+
+      <input
+        class="url-input"
+        id="firebaseUrlInput"
+        type="url"
+        placeholder="https://din-app-default-rtdb.firebasedatabase.app"
+        autocomplete="off"
+        autocapitalize="off"
+      />
+      <div class="error-msg" id="urlError">Ogiltig URL — den ska börja med https:// och sluta på .app</div>
+      <button class="save-btn" onclick="saveFirebaseUrl()">Spara och anslut</button>
     </div>
-    <button class="share-btn" onclick="shareLink()">
-      🔗 Dela länk
-    </button>
   </div>
 
-  <div class="card">
-    <h2>Ge medicin</h2>
-    <div class="med-list" id="medList"></div>
-
-    <div class="time-selector">
-      <div class="time-toggle">
-        <button id="btnNow" class="active" onclick="setTimeMode('now')">Nu</button>
-        <button id="btnCustom" onclick="setTimeMode('custom')">Annan tidpunkt</button>
+  <!-- ── Main app ──────────────────────────────────────────────────── -->
+  <div id="appScreen">
+    <div class="sync-bar">
+      <div class="sync-status">
+        <div class="sync-dot syncing" id="syncDot"></div>
+        <span id="syncText">Ansluter…</span>
       </div>
-      <div class="custom-time-row" id="customTimeRow">
-        <label for="customTime">Tid:</label>
-        <input type="datetime-local" id="customTime" />
+      <div class="top-btns">
+        <button class="icon-btn" onclick="shareLink()">🔗 Dela länk</button>
+        <button class="icon-btn" onclick="resetSetup()" title="Byt databas">⚙️</button>
       </div>
     </div>
 
-    <button class="confirm-btn" id="confirmBtn" disabled onclick="confirmDose()">
-      Bekräfta given dos
-    </button>
-  </div>
+    <div class="card">
+      <h2>Ge medicin</h2>
+      <div class="med-list" id="medList"></div>
 
-  <div class="card">
-    <h2>Senast givet</h2>
-    <div class="log-list" id="logList"></div>
+      <div class="time-selector">
+        <div class="time-toggle">
+          <button id="btnNow" class="active" onclick="setTimeMode('now')">Nu</button>
+          <button id="btnCustom" onclick="setTimeMode('custom')">Annan tidpunkt</button>
+        </div>
+        <div class="custom-time-row" id="customTimeRow">
+          <label for="customTime">Tid:</label>
+          <input type="datetime-local" id="customTime" />
+        </div>
+      </div>
+
+      <button class="confirm-btn" id="confirmBtn" disabled onclick="confirmDose()">
+        Bekräfta given dos
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Senast givet</h2>
+      <div class="log-list" id="logList"></div>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Firebase SDK (compat — works as globals) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <script>
     const MEDS = [
@@ -297,11 +474,9 @@
 
     let timeMode  = "now";
     let cachedLog = {};
-    let db;         // Gun.js node for this room
-    let connected  = false;
+    let dbRef     = null;
 
-    // ── Room ID ────────────────────────────────────────────────────────────
-    // The room ID lives in the URL hash so sharing the URL = sharing access.
+    // ── Room ID ───────────────────────────────────────────────────────
     function getRoomId() {
       const hash = window.location.hash.slice(1);
       if (hash && hash.length > 10) {
@@ -317,7 +492,29 @@
       return stored;
     }
 
-    // ── Share ──────────────────────────────────────────────────────────────
+    // ── Firebase setup ────────────────────────────────────────────────
+    function saveFirebaseUrl() {
+      const raw = document.getElementById("firebaseUrlInput").value.trim().replace(/\/$/, "");
+      const errEl = document.getElementById("urlError");
+
+      if (!raw.startsWith("https://") || !raw.endsWith(".app")) {
+        errEl.style.display = "block";
+        return;
+      }
+
+      errEl.style.display = "none";
+      localStorage.setItem("firebase_url", raw);
+      startApp(raw);
+    }
+
+    function resetSetup() {
+      if (!confirm("Byt databas? Du behöver ange en ny Firebase URL.")) return;
+      localStorage.removeItem("firebase_url");
+      document.getElementById("appScreen").style.display   = "none";
+      document.getElementById("setupScreen").style.display = "block";
+    }
+
+    // ── Share ─────────────────────────────────────────────────────────
     async function shareLink() {
       const url = window.location.href;
       if (navigator.share) {
@@ -326,70 +523,68 @@
         await navigator.clipboard.writeText(url);
         showToast("Länk kopierad!");
       } else {
-        prompt("Kopiera denna länk:", url);
+        prompt("Kopiera länken:", url);
       }
     }
 
-    // ── Format time ────────────────────────────────────────────────────────
-    function formatTime(isoString) {
-      if (!isoString) return null;
-      const d       = new Date(isoString);
-      const now     = new Date();
-      const diffMs  = now - d;
-      const mins    = Math.floor(diffMs / 60000);
-      const hours   = Math.floor(mins / 60);
-      const days    = Math.floor(hours / 24);
-      const timeStr = d.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
-      const dateStr = d.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" });
+    // ── Format time ───────────────────────────────────────────────────
+    function formatTime(iso) {
+      if (!iso) return null;
+      const d    = new Date(iso);
+      const now  = new Date();
+      const mins = Math.floor((now - d) / 60000);
+      const hrs  = Math.floor(mins / 60);
+      const days = Math.floor(hrs / 24);
+      const t    = d.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+      const dt   = d.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" });
 
       if (days === 0) {
         if (mins < 1)  return "Just nu";
-        if (mins < 60) return `för ${mins} min sedan (${timeStr})`;
-        return `idag ${timeStr} (${hours} tim sedan)`;
+        if (mins < 60) return `för ${mins} min sedan (${t})`;
+        return `idag ${t} (${hrs} tim sedan)`;
       }
-      if (days === 1) return `igår ${timeStr}`;
-      return `${dateStr} kl ${timeStr}`;
+      if (days === 1) return `igår ${t}`;
+      return `${dt} kl ${t}`;
     }
 
-    // ── Render ─────────────────────────────────────────────────────────────
+    // ── Render ────────────────────────────────────────────────────────
     function renderMedList() {
       const container = document.getElementById("medList");
-      const checked   = {};
+      const prev = {};
       MEDS.forEach(m => {
         const el = document.getElementById("chk_" + m.id);
-        if (el) checked[m.id] = el.checked;
+        if (el) prev[m.id] = el.checked;
       });
-
       container.innerHTML = "";
+
       MEDS.forEach(med => {
-        const lastTime = cachedLog[med.id];
-        const label    = document.createElement("label");
-        label.className = "med-item" + (checked[med.id] ? " checked" : "");
+        const label = document.createElement("label");
+        label.className = "med-item" + (prev[med.id] ? " checked" : "");
         label.htmlFor   = "chk_" + med.id;
 
-        const checkbox  = document.createElement("input");
-        checkbox.type   = "checkbox";
-        checkbox.id     = "chk_" + med.id;
-        checkbox.checked = !!checked[med.id];
-        checkbox.addEventListener("change", updateConfirmBtn);
-        checkbox.addEventListener("change", () => label.classList.toggle("checked", checkbox.checked));
+        const chk   = document.createElement("input");
+        chk.type    = "checkbox";
+        chk.id      = "chk_" + med.id;
+        chk.checked = !!prev[med.id];
+        chk.addEventListener("change", updateConfirmBtn);
+        chk.addEventListener("change", () => label.classList.toggle("checked", chk.checked));
 
-        const textDiv = document.createElement("div");
+        const info = document.createElement("div");
 
-        const nameEl = document.createElement("div");
-        nameEl.className   = "med-name";
-        nameEl.textContent = med.name;
+        const nm = document.createElement("div");
+        nm.className   = "med-name";
+        nm.textContent = med.name;
 
-        const lastEl = document.createElement("div");
-        lastEl.className   = "med-last";
-        lastEl.textContent = lastTime
-          ? "Senast: " + formatTime(lastTime)
+        const last = document.createElement("div");
+        last.className   = "med-last";
+        last.textContent = cachedLog[med.id]
+          ? "Senast: " + formatTime(cachedLog[med.id])
           : "Ingen dos loggad ännu";
 
-        textDiv.appendChild(nameEl);
-        textDiv.appendChild(lastEl);
-        label.appendChild(checkbox);
-        label.appendChild(textDiv);
+        info.appendChild(nm);
+        info.appendChild(last);
+        label.appendChild(chk);
+        label.appendChild(info);
         container.appendChild(label);
       });
     }
@@ -401,16 +596,16 @@
         const row = document.createElement("div");
         row.className = "log-entry";
 
-        const medEl = document.createElement("span");
-        medEl.className   = "log-med";
-        medEl.textContent = med.name;
+        const mn = document.createElement("span");
+        mn.className   = "log-med";
+        mn.textContent = med.name;
 
-        const timeEl = document.createElement("span");
-        timeEl.className   = "log-time";
-        timeEl.textContent = cachedLog[med.id] ? formatTime(cachedLog[med.id]) : "–";
+        const lt = document.createElement("span");
+        lt.className   = "log-time";
+        lt.textContent = cachedLog[med.id] ? formatTime(cachedLog[med.id]) : "–";
 
-        row.appendChild(medEl);
-        row.appendChild(timeEl);
+        row.appendChild(mn);
+        row.appendChild(lt);
         container.appendChild(row);
       });
     }
@@ -425,13 +620,12 @@
       document.getElementById("syncText").textContent = text;
     }
 
-    // ── Time mode ──────────────────────────────────────────────────────────
+    // ── Time mode ─────────────────────────────────────────────────────
     function setTimeMode(mode) {
       timeMode = mode;
       document.getElementById("btnNow").classList.toggle("active", mode === "now");
       document.getElementById("btnCustom").classList.toggle("active", mode === "custom");
-      const row = document.getElementById("customTimeRow");
-      row.classList.toggle("visible", mode === "custom");
+      document.getElementById("customTimeRow").classList.toggle("visible", mode === "custom");
       if (mode === "custom") {
         const now = new Date();
         now.setSeconds(0, 0);
@@ -440,15 +634,15 @@
       }
     }
 
-    // ── Confirm dose ───────────────────────────────────────────────────────
+    // ── Confirm dose ──────────────────────────────────────────────────
     function confirmDose() {
-      let timestamp;
+      let ts;
       if (timeMode === "custom") {
         const val = document.getElementById("customTime").value;
         if (!val) { showToast("Ange en tidpunkt först"); return; }
-        timestamp = new Date(val).toISOString();
+        ts = new Date(val).toISOString();
       } else {
-        timestamp = new Date().toISOString();
+        ts = new Date().toISOString();
       }
 
       const given = [];
@@ -457,17 +651,16 @@
         if (chk?.checked) {
           given.push(med.name);
           chk.checked = false;
-          // Write to Gun.js – all connected peers receive this instantly
-          db.get(med.id).put({ time: timestamp });
+          dbRef.child(med.id).set(ts);
         }
       });
 
       updateConfirmBtn();
-      const label = timeMode === "custom" ? " (retroaktivt)" : "";
-      showToast("Loggat: " + given.join(", ") + label);
+      const suffix = timeMode === "custom" ? " (retroaktivt)" : "";
+      showToast("Loggat: " + given.join(", ") + suffix);
     }
 
-    // ── Toast ──────────────────────────────────────────────────────────────
+    // ── Toast ─────────────────────────────────────────────────────────
     function showToast(msg) {
       const t = document.getElementById("toast");
       t.textContent = msg;
@@ -475,49 +668,47 @@
       setTimeout(() => t.classList.remove("show"), 3000);
     }
 
-    // ── Gun.js init ────────────────────────────────────────────────────────
-    function initGun() {
+    // ── Start app ─────────────────────────────────────────────────────
+    function startApp(firebaseUrl) {
+      document.getElementById("setupScreen").style.display = "none";
+      document.getElementById("appScreen").style.display   = "block";
+
       const roomId = getRoomId();
 
-      const gun = Gun({
-        peers: ["https://gun.eco/gun"],
-        localStorage: true,
-      });
+      const app = firebase.initializeApp({ databaseURL: firebaseUrl });
+      const db  = firebase.database(app);
+      dbRef = db.ref("medicinlogg/" + roomId);
 
-      db = gun.get("medicinlogg/" + roomId);
-
-      // Subscribe to each medicine's latest time
-      MEDS.forEach(med => {
-        db.get(med.id).on((data) => {
-          if (data && data.time) {
-            cachedLog[med.id] = data.time;
-            renderMedList();
-            renderLogList();
-          }
-          if (!connected) {
-            connected = true;
-            setSyncState("ok", "Synkad");
-          }
+      // Listen for real-time changes from all devices
+      dbRef.on("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        MEDS.forEach(med => {
+          if (data[med.id]) cachedLog[med.id] = data[med.id];
         });
-      });
-
-      // Timeout: if no data after 3s, show offline/local state
-      setTimeout(() => {
-        if (!connected) {
-          setSyncState("error", "Ingen synk – fungerar lokalt");
-          renderMedList();
-          renderLogList();
-        }
-      }, 3000);
-
-      // Periodically update the relative timestamps
-      setInterval(() => {
+        setSyncState("ok", "Synkad");
         renderMedList();
         renderLogList();
-      }, 60000);
+      }, (err) => {
+        console.error(err);
+        setSyncState("error", "Synkfel – kontrollera URL");
+      });
+
+      // Refresh relative timestamps every minute
+      setInterval(() => { renderMedList(); renderLogList(); }, 60000);
+
+      renderMedList();
+      renderLogList();
     }
 
-    initGun();
+    // ── Boot ──────────────────────────────────────────────────────────
+    (function boot() {
+      const savedUrl = localStorage.getItem("firebase_url");
+      if (savedUrl) {
+        startApp(savedUrl);
+      } else {
+        document.getElementById("setupScreen").style.display = "block";
+      }
+    })();
   </script>
 </body>
 </html>
