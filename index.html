@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Medicinlogg</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -21,19 +17,105 @@
       padding: 32px 16px;
     }
 
-    h1 {
-      font-size: 1.6rem;
-      color: #3b1f6e;
-      margin-bottom: 6px;
-    }
+    h1 { font-size: 1.6rem; color: #3b1f6e; margin-bottom: 6px; }
 
     .subtitle {
       color: #7a6a99;
       font-size: 0.95rem;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       text-align: center;
     }
 
+    /* Setup banner */
+    .setup-banner {
+      width: 100%;
+      max-width: 420px;
+      background: #fff8e1;
+      border: 2px solid #ffc107;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .setup-banner h3 {
+      font-size: 0.95rem;
+      color: #7a5500;
+      margin-bottom: 10px;
+    }
+
+    .setup-banner ol {
+      padding-left: 18px;
+      color: #5a4000;
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .setup-banner a { color: #7c4dcc; }
+
+    .setup-banner code {
+      background: #fff3cd;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+    }
+
+    .setup-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .setup-input-row input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #2d1a55;
+      outline: none;
+    }
+
+    .setup-input-row input:focus { border-color: #7c4dcc; }
+
+    .setup-input-row button {
+      padding: 9px 16px;
+      background: #7c4dcc;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* Sync status bar */
+    .sync-bar {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      color: #7a6a99;
+      min-height: 20px;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .sync-dot.ok { background: #4caf50; }
+    .sync-dot.syncing { background: #ffc107; }
+    .sync-dot.error { background: #f44336; }
+    .sync-dot.local { background: #9e9e9e; }
+
+    /* Card */
     .card {
       background: #fff;
       border-radius: 16px;
@@ -53,12 +135,7 @@
     }
 
     /* Medication checkboxes */
-    .med-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
+    .med-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
 
     .med-item {
       display: flex;
@@ -72,15 +149,8 @@
       user-select: none;
     }
 
-    .med-item:hover {
-      border-color: #b49ddf;
-      background: #faf7ff;
-    }
-
-    .med-item.checked {
-      border-color: #7c4dcc;
-      background: #f0eaff;
-    }
+    .med-item:hover { border-color: #b49ddf; background: #faf7ff; }
+    .med-item.checked { border-color: #7c4dcc; background: #f0eaff; }
 
     .med-item input[type="checkbox"] {
       width: 22px;
@@ -90,17 +160,8 @@
       flex-shrink: 0;
     }
 
-    .med-name {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #2d1a55;
-    }
-
-    .med-last {
-      font-size: 0.8rem;
-      color: #9985c4;
-      margin-top: 2px;
-    }
+    .med-name { font-size: 1.05rem; font-weight: 600; color: #2d1a55; }
+    .med-last { font-size: 0.8rem; color: #9985c4; margin-top: 2px; }
 
     /* Time selector */
     .time-selector {
@@ -110,11 +171,7 @@
       margin-bottom: 16px;
     }
 
-    .time-toggle {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 0;
-    }
+    .time-toggle { display: flex; gap: 8px; }
 
     .time-toggle button {
       flex: 1;
@@ -142,9 +199,7 @@
       gap: 10px;
     }
 
-    .custom-time-row.visible {
-      display: flex;
-    }
+    .custom-time-row.visible { display: flex; }
 
     .custom-time-row label {
       font-size: 0.85rem;
@@ -165,9 +220,7 @@
       transition: border-color 0.15s;
     }
 
-    .custom-time-row input[type="datetime-local"]:focus {
-      border-color: #7c4dcc;
-    }
+    .custom-time-row input[type="datetime-local"]:focus { border-color: #7c4dcc; }
 
     .confirm-btn {
       display: block;
@@ -183,24 +236,12 @@
       transition: background 0.15s, transform 0.1s;
     }
 
-    .confirm-btn:hover {
-      background: #6a3db8;
-    }
-
-    .confirm-btn:active {
-      transform: scale(0.98);
-    }
-
-    .confirm-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
+    .confirm-btn:hover { background: #6a3db8; }
+    .confirm-btn:active { transform: scale(0.98); }
+    .confirm-btn:disabled { background: #ccc; cursor: not-allowed; }
 
     /* Log section */
-    .log-list {
-      display: flex;
-      flex-direction: column;
-    }
+    .log-list { display: flex; flex-direction: column; }
 
     .log-entry {
       display: flex;
@@ -211,21 +252,9 @@
       gap: 8px;
     }
 
-    .log-entry:last-child {
-      border-bottom: none;
-    }
-
-    .log-med {
-      font-weight: 600;
-      color: #2d1a55;
-      font-size: 0.95rem;
-    }
-
-    .log-time {
-      font-size: 0.85rem;
-      color: #7a6a99;
-      white-space: nowrap;
-    }
+    .log-entry:last-child { border-bottom: none; }
+    .log-med { font-weight: 600; color: #2d1a55; font-size: 0.95rem; }
+    .log-time { font-size: 0.85rem; color: #7a6a99; white-space: nowrap; }
 
     /* Toast */
     .toast {
@@ -246,9 +275,7 @@
       z-index: 100;
     }
 
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
@@ -256,12 +283,32 @@
   <h1>Medicinlogg</h1>
   <p class="subtitle">Välj medicin och bekräfta för att logga tidpunkten</p>
 
+  <!-- Setup banner (hidden when Firebase is configured) -->
+  <div class="setup-banner" id="setupBanner" style="display:none">
+    <h3>⚙️ Anslut till Firebase för delad logg</h3>
+    <ol>
+      <li>Gå till <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
+      <li>Skapa ett projekt → välj <strong>Realtime Database</strong></li>
+      <li>Skapa databas → välj <strong>testläge</strong> (tillåter delning)</li>
+      <li>Kopiera URL:en (ser ut som <code>https://mitt-projekt-rtdb.firebaseio.com</code>)</li>
+      <li>Klistra in den nedan och spara</li>
+    </ol>
+    <div class="setup-input-row">
+      <input type="url" id="firebaseInput" placeholder="https://mitt-projekt-rtdb.firebaseio.com" />
+      <button onclick="saveFirebaseUrl()">Spara</button>
+    </div>
+  </div>
+
+  <!-- Sync status -->
+  <div class="sync-bar" id="syncBar" style="display:none">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncText"></span>
+  </div>
+
   <div class="card">
     <h2>Ge medicin</h2>
-
     <div class="med-list" id="medList"></div>
 
-    <!-- Time selector -->
     <div class="time-selector">
       <div class="time-toggle">
         <button id="btnNow" class="active" onclick="setTimeMode('now')">Nu</button>
@@ -292,84 +339,126 @@
       { id: "antibiotika", name: "Antibiotika" },
     ];
 
-    const STORAGE_KEY = "medicinlogg_v1";
-    let timeMode = "now"; // "now" | "custom"
+    const LS_KEY   = "medicinlogg_v1";
+    const LS_FBURL = "medicinlogg_firebase_url";
 
-    function loadLog() {
+    let timeMode   = "now";
+    let firebaseUrl = "";
+    let cachedLog  = {};
+    let pollTimer  = null;
+
+    // ── Firebase URL management ────────────────────────────────────────────
+    function getFirebaseUrl() {
+      return localStorage.getItem(LS_FBURL) || "";
+    }
+
+    function saveFirebaseUrl() {
+      const val = document.getElementById("firebaseInput").value.trim().replace(/\/$/, "");
+      if (!val.startsWith("https://")) {
+        showToast("Ogiltig URL – börjar med https://");
+        return;
+      }
+      localStorage.setItem(LS_FBURL, val);
+      firebaseUrl = val;
+      init();
+    }
+
+    // ── Data layer ─────────────────────────────────────────────────────────
+    async function loadLog() {
+      if (!firebaseUrl) {
+        try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+        catch { return {}; }
+      }
+      const resp = await fetch(firebaseUrl + "/meds.json");
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const data = await resp.json();
+      return data || {};
+    }
+
+    async function saveLog(log) {
+      if (!firebaseUrl) {
+        localStorage.setItem(LS_KEY, JSON.stringify(log));
+        return;
+      }
+      const resp = await fetch(firebaseUrl + "/meds.json", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(log),
+      });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+    }
+
+    // ── Polling ────────────────────────────────────────────────────────────
+    function startPolling() {
+      if (pollTimer) clearInterval(pollTimer);
+      if (!firebaseUrl) return;
+      pollTimer = setInterval(fetchAndRender, 15000);
+    }
+
+    async function fetchAndRender() {
+      setSyncState("syncing", "Synkar…");
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-      } catch {
-        return {};
+        cachedLog = await loadLog();
+        renderMedList();
+        renderLogList();
+        const t = new Date().toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+        setSyncState("ok", "Synkad " + t);
+      } catch (e) {
+        setSyncState("error", "Kunde inte nå Firebase");
       }
     }
 
-    function saveLog(log) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(log));
+    // ── Sync status UI ─────────────────────────────────────────────────────
+    function setSyncState(state, text) {
+      document.getElementById("syncDot").className = "sync-dot " + state;
+      document.getElementById("syncText").textContent = text;
     }
 
+    // ── Render ─────────────────────────────────────────────────────────────
     function formatTime(isoString) {
       if (!isoString) return null;
       const d = new Date(isoString);
       const now = new Date();
-      const diffMs = now - d;
-      const diffMins = Math.floor(diffMs / 60000);
+      const diffMins  = Math.floor((now - d) / 60000);
       const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-
-      const timeStr = d.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
-      const dateStr = d.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" });
+      const diffDays  = Math.floor(diffHours / 24);
+      const timeStr   = d.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+      const dateStr   = d.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" });
 
       if (diffDays === 0) {
-        if (diffMins < 1) return "Just nu";
+        if (diffMins < 1)  return "Just nu";
         if (diffMins < 60) return `för ${diffMins} min sedan (${timeStr})`;
         return `idag ${timeStr} (${diffHours} tim sedan)`;
-      } else if (diffDays === 1) {
-        return `igår ${timeStr}`;
-      } else {
-        return `${dateStr} kl ${timeStr}`;
       }
-    }
-
-    function setTimeMode(mode) {
-      timeMode = mode;
-      document.getElementById("btnNow").classList.toggle("active", mode === "now");
-      document.getElementById("btnCustom").classList.toggle("active", mode === "custom");
-      const row = document.getElementById("customTimeRow");
-      row.classList.toggle("visible", mode === "custom");
-
-      if (mode === "custom") {
-        // Pre-fill with current local time
-        const now = new Date();
-        now.setSeconds(0, 0);
-        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-          .toISOString()
-          .slice(0, 16);
-        document.getElementById("customTime").value = local;
-      }
+      if (diffDays === 1) return `igår ${timeStr}`;
+      return `${dateStr} kl ${timeStr}`;
     }
 
     function renderMedList() {
-      const log = loadLog();
       const container = document.getElementById("medList");
-      container.innerHTML = "";
+      // Preserve checked state
+      const checked = {};
+      MEDS.forEach(m => {
+        const el = document.getElementById("chk_" + m.id);
+        if (el) checked[m.id] = el.checked;
+      });
 
+      container.innerHTML = "";
       MEDS.forEach(med => {
-        const lastTime = log[med.id];
+        const lastTime = cachedLog[med.id];
         const label = document.createElement("label");
-        label.className = "med-item";
+        label.className = "med-item" + (checked[med.id] ? " checked" : "");
         label.htmlFor = "chk_" + med.id;
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = "chk_" + med.id;
+        checkbox.checked = !!checked[med.id];
         checkbox.addEventListener("change", updateConfirmBtn);
-        checkbox.addEventListener("change", () => {
-          label.classList.toggle("checked", checkbox.checked);
-        });
+        checkbox.addEventListener("change", () => label.classList.toggle("checked", checkbox.checked));
 
         const textDiv = document.createElement("div");
-
-        const nameEl = document.createElement("div");
+        const nameEl  = document.createElement("div");
         nameEl.className = "med-name";
         nameEl.textContent = med.name;
 
@@ -388,10 +477,8 @@
     }
 
     function renderLogList() {
-      const log = loadLog();
       const container = document.getElementById("logList");
       container.innerHTML = "";
-
       MEDS.forEach(med => {
         const row = document.createElement("div");
         row.className = "log-entry";
@@ -402,7 +489,7 @@
 
         const timeEl = document.createElement("span");
         timeEl.className = "log-time";
-        timeEl.textContent = log[med.id] ? formatTime(log[med.id]) : "–";
+        timeEl.textContent = cachedLog[med.id] ? formatTime(cachedLog[med.id]) : "–";
 
         row.appendChild(medEl);
         row.appendChild(timeEl);
@@ -411,49 +498,68 @@
     }
 
     function updateConfirmBtn() {
-      const anyChecked = MEDS.some(med =>
-        document.getElementById("chk_" + med.id)?.checked
-      );
-      document.getElementById("confirmBtn").disabled = !anyChecked;
+      const any = MEDS.some(m => document.getElementById("chk_" + m.id)?.checked);
+      document.getElementById("confirmBtn").disabled = !any;
     }
 
-    function confirmDose() {
-      let timestamp;
+    // ── Time mode ──────────────────────────────────────────────────────────
+    function setTimeMode(mode) {
+      timeMode = mode;
+      document.getElementById("btnNow").classList.toggle("active", mode === "now");
+      document.getElementById("btnCustom").classList.toggle("active", mode === "custom");
+      const row = document.getElementById("customTimeRow");
+      row.classList.toggle("visible", mode === "custom");
 
+      if (mode === "custom") {
+        const now = new Date();
+        now.setSeconds(0, 0);
+        document.getElementById("customTime").value =
+          new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      }
+    }
+
+    // ── Confirm dose ───────────────────────────────────────────────────────
+    async function confirmDose() {
+      let timestamp;
       if (timeMode === "custom") {
         const val = document.getElementById("customTime").value;
-        if (!val) {
-          showToast("Ange en tidpunkt först");
-          return;
-        }
+        if (!val) { showToast("Ange en tidpunkt först"); return; }
         timestamp = new Date(val).toISOString();
       } else {
         timestamp = new Date().toISOString();
       }
 
-      const log = loadLog();
-      const given = [];
+      const btn = document.getElementById("confirmBtn");
+      btn.disabled = true;
 
+      const log = { ...cachedLog };
+      const given = [];
       MEDS.forEach(med => {
         const chk = document.getElementById("chk_" + med.id);
-        if (chk && chk.checked) {
+        if (chk?.checked) {
           log[med.id] = timestamp;
           given.push(med.name);
           chk.checked = false;
         }
       });
 
-      saveLog(log);
-      renderMedList();
-      renderLogList();
+      setSyncState("syncing", "Sparar…");
+      try {
+        await saveLog(log);
+        cachedLog = log;
+        renderMedList();
+        renderLogList();
+        const label = timeMode === "custom" ? " (retroaktivt)" : "";
+        setSyncState("ok", "Synkad " + new Date().toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }));
+        showToast("Loggat: " + given.join(", ") + label);
+      } catch (e) {
+        setSyncState("error", "Kunde inte spara – kontrollera Firebase");
+        showToast("Fel: kunde inte spara");
+      }
       updateConfirmBtn();
-
-      const timeLabel = timeMode === "custom"
-        ? " (retroaktivt)"
-        : "";
-      showToast("Loggat: " + given.join(", ") + timeLabel);
     }
 
+    // ── Toast ──────────────────────────────────────────────────────────────
     function showToast(msg) {
       const t = document.getElementById("toast");
       t.textContent = msg;
@@ -461,14 +567,31 @@
       setTimeout(() => t.classList.remove("show"), 3000);
     }
 
-    // Refresh displayed times every minute
-    setInterval(() => {
-      renderMedList();
-      renderLogList();
-    }, 60000);
+    // ── Init ───────────────────────────────────────────────────────────────
+    async function init() {
+      firebaseUrl = getFirebaseUrl();
 
-    renderMedList();
-    renderLogList();
+      const setupBanner = document.getElementById("setupBanner");
+      const syncBar     = document.getElementById("syncBar");
+
+      if (firebaseUrl) {
+        setupBanner.style.display = "none";
+        syncBar.style.display     = "flex";
+        setSyncState("syncing", "Ansluter…");
+      } else {
+        setupBanner.style.display = "block";
+        syncBar.style.display     = "none";
+        setSyncState("local", "Lokalt läge (ej delad)");
+      }
+
+      await fetchAndRender();
+      startPolling();
+    }
+
+    // Refresh displayed relative times every minute
+    setInterval(() => { renderMedList(); renderLogList(); }, 60000);
+
+    init();
   </script>
 </body>
 </html>
